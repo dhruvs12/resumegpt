@@ -51,6 +51,116 @@
         #downloadResume:hover {
             background-color: #27ae60;
         }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        
+        .button-group button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .button-group button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #downloadJSON {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        #downloadPDF {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #downloadJSON:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        
+        #downloadPDF:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #e74c3c;
+            border-radius: 4px;
+            background-color: #fde8e7;
+        }
+        
+        .experience-item, .education-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-left: 3px solid #3498db;
+            background-color: #f8f9fa;
+        }
+        
+        .experience-item h4, .education-item h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        #downloadJSON {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        #downloadPDF {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        #downloadJSON:hover:not(:disabled),
+        #downloadPDF:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        
+        #downloadJSON,
+        #downloadPDF {
+            cursor: pointer;
+        }
+        
+        #downloadJSON:disabled,
+        #downloadPDF:disabled {
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -59,10 +169,14 @@
         <p>Drop your resume file here or click to upload</p>
     </div>
     
-    <button id="tailorResume" disabled>Tailor Resume</button>
-    <button id="togglePreview" disabled>Preview</button>
-    <button id="editResume" disabled>Edit</button>
-    <button id="saveEdits" disabled>Save</button>
+    <div class="button-group">
+        <button id="tailorResume" disabled>Tailor Resume</button>
+        <button id="togglePreview" disabled>Preview</button>
+        <button id="editResume" disabled>Edit</button>
+        <button id="saveEdits" disabled>Save</button>
+        <button id="downloadJSON" disabled>Download JSON</button>
+        <button id="downloadPDF" disabled>Download PDF</button>
+    </div>
     
     <div id="status"></div>
     <div id="tailoredResume"></div>

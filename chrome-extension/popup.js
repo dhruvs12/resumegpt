@@ -2,6 +2,7 @@ class ResumeGPTExtension {
     constructor() {
         this.API_URL = 'http://localhost:5000/api';
         this.resumeData = null;
+        this.tailoredResume = null;
         this.setupEventListeners();
         this.setupDragAndDrop();
         this.checkJobPage();
@@ -17,6 +18,10 @@ class ResumeGPTExtension {
         // Add manual adjustments
         document.getElementById('editResume').addEventListener('click', this.enableEditing.bind(this));
         document.getElementById('saveEdits').addEventListener('click', this.saveEdits.bind(this));
+        
+        // Add download button listeners
+        document.getElementById('downloadJSON').addEventListener('click', () => this.downloadResume('json'));
+        document.getElementById('downloadPDF').addEventListener('click', () => this.downloadResume('pdf'));
     }
     
     setupDragAndDrop() {
@@ -161,7 +166,6 @@ class ResumeGPTExtension {
                 throw new Error('Failed to extract job details.');
             }
 
-            // Log the exact data we're sending
             const requestData = {
                 jobHtml: jobHtml.description,
                 resumeData: this.resumeData
@@ -169,6 +173,8 @@ class ResumeGPTExtension {
             console.log('Request Data:', JSON.stringify(requestData, null, 2));
 
             document.getElementById('tailorResume').disabled = true;
+            document.getElementById('downloadJSON').disabled = true;
+            document.getElementById('downloadPDF').disabled = true;
             document.getElementById('status').textContent = 'Tailoring resume...';
             
             const response = await fetch(`${this.API_URL}/tailor-resume`, {
@@ -191,8 +197,9 @@ class ResumeGPTExtension {
             const result = JSON.parse(responseText);
             console.log('Parsed result:', result);
 
-            if (result.success) {
-                this.displayTailoredResume(result.data.tailored_resume);
+            if (result.success && result.data) {
+                this.tailoredResume = result.data;
+                this.displayTailoredResume(result.data);
                 document.getElementById('status').textContent = 'Resume tailored successfully!';
                 document.getElementById('status').className = 'success';
             } else {
@@ -203,7 +210,7 @@ class ResumeGPTExtension {
             document.getElementById('status').textContent = `Error: ${error.message}`;
             document.getElementById('status').className = 'error';
         } finally {
-            this.checkJobPage();
+            document.getElementById('tailorResume').disabled = false;
         }
     }
 
@@ -250,37 +257,72 @@ class ResumeGPTExtension {
     }
 
     displayTailoredResume(data) {
-        const tailoredResumeDiv = document.getElementById('tailoredResume');
-        tailoredResumeDiv.innerHTML = `
-            <h2>${data.name}</h2>
-            <p><strong>Skills:</strong> ${data.skills.join(', ')}</p>
-            <div id="resumeContent">
-                <h3>Experience</h3>
-                ${data.experience.map(exp => `<p><strong>${exp.title}</strong> at <strong>${exp.company}</strong><br>${exp.description}</p>`).join('')}
-                <h3>Education</h3>
-                ${data.education.map(edu => `<p><strong>${edu.degree}</strong> at <strong>${edu.school}</strong><br>${edu.description}</p>`).join('')}
-            </div>
-            <button id="downloadResume">Download Tailored Resume</button>
-        `;
-        tailoredResumeDiv.style.display = 'block';
-        
-        // Add download handler
-        document.getElementById('downloadResume').addEventListener('click', () => {
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'tailored_resume.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-        
-        // Enable Preview and Edit buttons
-        document.getElementById('togglePreview').disabled = false;
-        document.getElementById('editResume').disabled = false;
-        document.getElementById('saveEdits').disabled = false;
+        try {
+            console.log('Received tailored resume data:', data);
+            this.tailoredResume = data;
+            console.log('Set tailoredResume property:', this.tailoredResume);
+            const tailoredResumeDiv = document.getElementById('tailoredResume');
+            
+            // Check if we have valid data structure
+            if (!data || !data.tailored_resume) {
+                console.error('Invalid data structure:', data);
+                throw new Error('Invalid response data structure');
+            }
+
+            const resume = data.tailored_resume;
+            
+            // Create the HTML content with null checks and default values
+            tailoredResumeDiv.innerHTML = `
+                <div id="resumeContent">
+                    <h2>${resume.name || 'Untitled Resume'}</h2>
+                    <div class="section">
+                        <h3>Skills</h3>
+                        <p>${Array.isArray(resume.skills) ? resume.skills.join(', ') : 'No skills listed'}</p>
+                    </div>
+                    <div class="section">
+                        <h3>Experience</h3>
+                        ${Array.isArray(resume.experience) ? resume.experience.map(exp => `
+                            <div class="experience-item">
+                                <h4>${exp.title || ''} ${exp.company ? `at ${exp.company}` : ''}</h4>
+                                <p>${exp.description || ''}</p>
+                            </div>
+                        `).join('') : '<p>No experience listed</p>'}
+                    </div>
+                    <div class="section">
+                        <h3>Education</h3>
+                        ${Array.isArray(resume.education) ? resume.education.map(edu => `
+                            <div class="education-item">
+                                <h4>${edu.degree || ''}</h4>
+                                <p>${edu.school || ''}</p>
+                                <p>${edu.description || ''}</p>
+                            </div>
+                        `).join('') : '<p>No education listed</p>'}
+                    </div>
+                    <div class="section">
+                        <h3>Match Score</h3>
+                        <p>${data.match_score || 0}%</p>
+                    </div>
+                    <div class="section">
+                        <h3>Improvements Made</h3>
+                        <ul>
+                            ${Array.isArray(data.improvements) ? data.improvements.map(imp => `<li>${imp}</li>`).join('') : '<li>No improvements listed</li>'}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            tailoredResumeDiv.style.display = 'block';
+            
+            // Enable all buttons
+            document.getElementById('togglePreview').disabled = false;
+            document.getElementById('editResume').disabled = false;
+            document.getElementById('saveEdits').disabled = false;
+            document.getElementById('downloadJSON').disabled = false;
+            document.getElementById('downloadPDF').disabled = false;
+        } catch (error) {
+            console.error('Error displaying tailored resume:', error);
+            throw error; // Re-throw to be caught by the caller
+        }
     }
 
     togglePreview() {
@@ -358,6 +400,107 @@ class ResumeGPTExtension {
                 document.getElementById('status').className = 'error';
                 console.error("File Upload Error:", error);
             }
+        }
+    }
+
+    downloadResume(format) {
+        try {
+            if (!this.tailoredResume) {
+                throw new Error('No tailored resume available to download');
+            }
+
+            if (format === 'json') {
+                const jsonData = {
+                    tailored_resume: this.tailoredResume.tailored_resume || {},
+                    match_score: this.tailoredResume.match_score || 0,
+                    improvements: this.tailoredResume.improvements || []
+                };
+                const blob = new Blob([JSON.stringify(jsonData, null, 2)], { type: 'application/json' });
+                this.downloadBlob(blob, 'tailored_resume.json');
+            } else if (format === 'pdf') {
+                this.generatePDF();
+            }
+        } catch (error) {
+            console.error('Download error:', error);
+            document.getElementById('status').textContent = error.message;
+            document.getElementById('status').className = 'error';
+        }
+    }
+
+    downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    generatePDF() {
+        try {
+            const content = document.getElementById('resumeContent');
+            if (!content) {
+                throw new Error('Resume content not found');
+            }
+
+            const printWindow = window.open('', '', 'height=800,width=600');
+            if (!printWindow) {
+                throw new Error('Failed to open print window');
+            }
+
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Tailored Resume</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 40px;
+                                line-height: 1.6;
+                                color: #333;
+                            }
+                            h1, h2, h3 { 
+                                color: #2c3e50; 
+                                margin-top: 20px;
+                            }
+                            .section { 
+                                margin-bottom: 25px;
+                                page-break-inside: avoid;
+                            }
+                            .experience-item, .education-item {
+                                margin-bottom: 15px;
+                                padding: 10px;
+                                background-color: #f8f9fa;
+                                border-left: 3px solid #3498db;
+                            }
+                            ul { margin: 0; padding-left: 20px; }
+                            li { margin-bottom: 5px; }
+                            @media print {
+                                body { margin: 20px; }
+                                .section { page-break-inside: avoid; }
+                                .experience-item, .education-item {
+                                    background-color: white;
+                                    border-left: 2px solid #000;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${content.innerHTML}
+                    </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+            printWindow.close();
+        } catch (error) {
+            console.error('PDF generation error:', error);
+            document.getElementById('status').textContent = `Error generating PDF: ${error.message}`;
+            document.getElementById('status').className = 'error';
         }
     }
 }
