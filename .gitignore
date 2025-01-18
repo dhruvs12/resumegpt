@@ -42,6 +42,10 @@ Thumbs.db
 htmlcov/
 .pytest_cache/
 .mypy_cache/
+data/
+resources/fonts/
+test_*.json
+config.py
 
 # Chrome Extension
 chrome-extension/*.zip
@@ -82,3 +86,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# GitHub specific
+.github/
