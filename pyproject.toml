@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ResumeGPT"
+version = "2.1"
+description = "Tailor your resume to match any job posting effortlessly"
+authors = [
+    { name = "Tyler Kline", email = "tylerkline@gmail.com" }
+]
+maintainers = [
+    { name = "Tyler Kline", email = "tylerkline@gmail.com" }
+]
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+requires-python = ">=3.10"
+dependencies = [
+    "flask>=2.0",
+    "flask-cors",
+    "transformers",
+    "numpy",
+    "sentence-transformers",
+    "beautifulsoup4",
+    "pydantic",
+    "langchain-google-genai",
+]
+keywords = ["resume", "job", "application", "automation", "job search"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.2"
+]
+
+[project.urls]
+Homepage = "https://github.com/takline/ResumeGPT"
+"Bug Tracker" = "https://github.com/takline/ResumeGPT/issues"
