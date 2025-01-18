@@ -1,8 +1,84 @@
-/tools/
-**__pycache__**
-.DS_Store
-data/*
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-.aider.*
-.plandex/*
-.vscode/*
+# Virtual Environment
+env/
+venv/
+ENV/
+.env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Project specific
+*.log
+*.sqlite3
+*.db
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Chrome Extension
+chrome-extension/*.zip
+chrome-extension/node_modules/
+
+# API Keys and Secrets
+*.pem
+*.key
+*.crt
+config.ini
+secrets.json
+
+# Temporary files
+*.bak
+*.tmp
+*.temp
+
+# Local development
+local_settings.py
+db.sqlite3
+media/
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg

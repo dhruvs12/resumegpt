@@ -108,14 +108,15 @@ class ResumeImprover:
             if not line or line == 'content:':
                 continue
 
-            # Remove YAML markers and quotes
-            line = line.strip('- "\'')
-            line = line.replace('\\u2022', '•')  # Replace unicode bullet
-            
-            # Skip contact info line
-            if '@' in line and '|' in line:
+            # Extract name from the first line
+            if not resume['name'] and '|' in line:
+                resume['name'] = line.split('|')[0].strip()
                 continue
 
+            # Remove YAML markers and quotes
+            line = line.strip('- "\'')
+            line = line.replace('\\u2022', '•')
+            
             # Detect sections
             if 'Education' in line:
                 current_section = 'education'
@@ -130,22 +131,28 @@ class ResumeImprover:
             if current_section == 'skills':
                 if ':' in line:
                     _, skills = line.split(':', 1)
-                    resume['skills'].extend([s.strip() for s in skills.split(',')])
+                    resume['skills'].extend([s.strip().strip("'") for s in skills.split(',')])
             
             elif current_section == 'experience':
-                if '–' in line or '-' in line:  # New position
+                if ('–' in line or '-' in line) and not line.startswith('•'):
                     if current_item and current_item['description']:
                         resume['experience'].append(current_item)
                     
                     parts = line.split('–')
-                    title = parts[0].strip()
-                    current_item = {
-                        'title': title,
-                        'company': '',
-                        'description': ''
-                    }
+                    if len(parts) >= 2:
+                        title = parts[0].strip()
+                        company = parts[1].strip()
+                        current_item = {
+                            'title': title,
+                            'company': company,
+                            'description': ''
+                        }
                 elif line.startswith('•') and current_item:
-                    current_item['description'] += ' ' + line[1:].strip()
+                    description = line[1:].strip()
+                    if current_item['description']:
+                        current_item['description'] += ' ' + description
+                    else:
+                        current_item['description'] = description
             
             elif current_section == 'education':
                 if 'Purdue' in line:
@@ -158,9 +165,5 @@ class ResumeImprover:
         # Add last experience item
         if current_item and current_item['description']:
             resume['experience'].append(current_item)
-
-        # Set name if not set
-        if not resume['name'] and len(lines) > 0:
-            resume['name'] = lines[0].strip('- ')
 
         return resume

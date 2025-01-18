@@ -1,196 +1,106 @@
-<h1 align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="images/ResumeGPT-light.png"/>
-    <source media="(prefers-color-scheme: light)" srcset="images/ResumeGPT.png"/>
-    <img width="400" src="images/ResumeGPT.png"/>
- <br />
-</h1>
+# ResumeGPT
 
-<div align="center">
-
-<p align="center">
-  <a href="#features">
-    <b>Features</b>
-  </a>
-     · 
-  <a href="#installation">
-    <b>Install</b>
-  </a>
-     · 
-  <a href="#usage">
-    <b>Usage</b>
-  </a>
-      · 
-  <a href="#discussions">
-    <b>Discussions</b>
-  </a>
-     · 
-  <a href="#contributors">
-    <b>Contributors</b>
-  </a>
-
-</p>
-
-
-
-<br>
-
-
-</div>
-
-<br>
-
-<h3 align="center">Tailor your resume to match any job posting effortlessly with ResumeGPT.
-</h3>
-
-<br/>
-ResumeGPT allows you to simply provide your resume and a job posting link, and it will produce a formatted ATS friendly PDF resume that is optimized and personalize your resume to align with the specific requirements and keywords of the job. 
+An AI-powered Chrome extension that automatically tailors your resume to job descriptions using Google's Gemini AI.
 
 ## Features
-- Extracts relevant skills, qualifications, and keywords from a job posting.
-- Tailors your curent resume to match job requirements.
-- Generates professional ATS friendly PDF resumes.
-- Allows for user verification and customization before finalizing the resume.
+
+- Automatically extracts job descriptions from popular job sites
+- Parses YAML/JSON formatted resumes
+- Uses AI to tailor your resume to specific job requirements
+- Real-time resume preview and editing
+- Download tailored resumes in multiple formats
 
 ## Installation
 
-```bash
-pip install ResumeGPT
-```
+### Backend Setup
 
-or:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/resumegpt.git
+   cd resumegpt
+   ```
 
-```bash
-pip install git+https://github.com/takline/ResumeGPT.git
-```
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv env
+   
+   # On macOS/Linux
+   source env/bin/activate
+   
+   # On Windows
+   env\Scripts\activate
+   ```
 
-or:
+3. Install dependencies:
+   ```bash
+   pip install -e .
+   ```
 
+4. Create a `.env` file with your API keys:
+   ```env
+   GOOGLE_API_KEY=your_api_key_here
+   GEMINI_API_KEY=your_api_key_here
+   GEMINI_MODEL_NAME=gemini-1.5-pro
+   GEMINI_TEMPERATURE=0.7
+   ```
 
-```bash
-git clone https://github.com/takline/ResumeGPT.git
-cd ResumeGPT
-pip install -r requirements.txt
-```
+### Chrome Extension Setup
+
+1. Open Chrome and navigate to `chrome://extensions/`.
+2. Enable "Developer mode."
+3. Click "Load unpacked" and select the `chrome-extension` directory.
 
 ## Usage
 
- - Add your resume to `ResumeGPT/data/sample_resume.yaml` (make sure `ResumeGPT.config.YOUR_RESUME_NAME` is set to your resume filename in the `.data/` folder)
- - Provide ResumeGPT with the link to a job posting and it will tailot your resume to the job:
+1. Navigate to a job posting on a supported job site.
+2. Click the ResumeGPT extension icon.
+3. Upload your resume (YAML/JSON format).
+4. Click "Tailor Resume."
+5. Review, edit, and download the tailored resume.
 
-### Single job posting usage
-```python
-url = "https://[link to your job posting]"
-resume_improver = ResumeGPT.services.ResumeImprover(url)
-resume_improver.create_draft_tailored_resume()
+## Development
+
+### Backend Development
+```bash
+python -m resumegpt.app
 ```
 
-ResumeGPT then creates a new resume YAML file in a new folder named after the job posting (`ResumeGPT/data/[Company_Name_Job_Title]/resume.yaml`) with a YAML key/value: `editing: true`. ResumeGPT will wait for you to update this key to verify the resume updates and allow them to make their own updates until users set `editing=false`. Then ResumeGPT will create a PDF version of their resume.
+### Extension Development
+Load the unpacked extension in Chrome's developer mode.
 
+## Contributing
 
-### Custom resume location usage
-Initialize `ResumeImprover` via a `.yaml` filepath.:
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
-```python
-resume_improver = ResumeGPT.services.ResumeImprover(url=url, resume_location="custom/path/to/resume.yaml")
-resume_improver.create_draft_tailored_resume()
-```
+## License
 
-### Post-initialization usage
-```python
-resume_improver.update_resume("./new_resume.yaml")
-resume_improver.url = "https://[new link to your job posting]"
-resume_improver.download_and_parse_job_post()
-resume_improver.create_draft_tailored_resume()
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Background usage
-You can run multiple ResumeGPT.services.ResumeImprover's concurrently via ResumeGPT's BackgroundRunner class (as it takes a couple of minutes for ResumeImprover to complete a single run):
-```python
-background_configs = [
-    {
-        "url": "https://[link to your job posting 1]",
-        "auto_open": True,
-        "manual_review": True,
-        "resume_location": "/path/to/resume1.yaml",
-    },
-    {
-        "url": "https://[link to your job posting 2]",
-        "auto_open": False,
-        "manual_review": False,
-        "resume_location": "/path/to/resume2.yaml",
-    },
-    {
-        "url": "https://[link to your job posting 3]",
-        "auto_open": True,
-        "manual_review": True,
-        "resume_location": "/path/to/resume3.yaml",
-    },
-]
-background_runner = ResumeGPT.services.ResumeImprover.create_draft_tailored_resumes_in_background(background_configs=background_configs)
-#Check the status of background tasks (saves the output to `ResumeGPT/data/background_tasks/tasks.log`)
-background_runner["background_runner"].check_status()
-#Stop all running tasks
-background_runner["background_runner"].stop_all_tasks()
-#Extract a ResumeImprover
-first_resume_improver = background_runner["ResumeImprovers"][0]
-```
+---
 
-You will follow the same workflow when using ResumeGPT's BackgroundRunner (ex: verify the resume updates via `editing=false` in each `ResumeGPT/data/[Company_Name_Job_Title]/resume.yaml` file). You can also find logs for the BackgroundRunner in `ResumeGPT/data/background_tasks/tasks.log`.
+MIT License
 
-Once all of the background tasks are complete:
+Copyright (c) 2024 Dhruv Singh
 
-```python
-background_runner["background_runner"].check_status()
-```
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Output:
-```
-['Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.',
- 'Task completed.']
-```
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Create the pdf for each `ResumeImprovers` instance:
-
-```python
-for improver in background_runner["ResumeImprovers"]:
-    pdf_generator = ResumeGPT.pdf_generation.ResumePDFGenerator()
-    resume_yaml_path = os.path.join(improver.job_data_location, "resume.yaml")
-    pdf_generator.generate_resume(improver.job_data_location, ResumeGPT.utils.read_yaml(filename=resume_yaml_path))
-```
-
-
-### ResumeGPT PDF Output
-Example ATS friendly resume created by ResumeGPT:
-
-```python
-pdf_generator = ResumeGPT.pdf_generation.ResumePDFGenerator()
-pdf_generator.generate_resume("/path/to/save/pdf/", ResumeGPT.utils.read_yaml(filename="/path/to/resume/resume.yaml"))
-```
-
-
-<p align="center">
-  <img src="images/example_resume_output.png" alt="Resume Example" width="400"/>
-</p>
-
-
-
-
-## Discussions
-Feel free to give feedback, ask questions, report a bug, or suggest improvements:
-
- - [Discussions](https://github.com/takline/ResumeGPT/discussions)
- - [Issues](https://github.com/takline/ResumeGPT/issues)
-
-
-##  Contributors
-⭐️  Please star, fork, explore, and contribute to ResumeGPT. There's a lot of work room for improvement so any contributions are appreciated.
-
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 

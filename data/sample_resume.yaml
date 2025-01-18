@@ -1,0 +1,59 @@
+editing: false
+debug: false
+
+basic:
+  name: "John Doe"
+  address: "New York, NY"
+  email: "john.doe@email.com"
+  phone: "(555) 123-4567"
+  websites:
+    - "linkedin.com/in/johndoe"
+    - "github.com/johndoe"
+
+objective: "Experienced software engineer seeking challenging opportunities..."
+
+education:
+  - school: "University of Technology"
+    degrees:
+      - names:
+          - "Bachelor of Science in Computer Science"
+    graduation_date: "2020"
+    gpa: "3.8"
+
+experiences:
+  - company: "Tech Corp"
+    skip_name: false
+    location: "San Francisco, CA"
+    titles:
+      - name: "Software Engineer"
+        startdate: "2020-06"
+        enddate: "Present"
+    highlights:
+      - "Developed and maintained web applications using React and Node.js"
+      - "Implemented CI/CD pipelines reducing deployment time by 50%"
+
+projects:
+  - name: "Project Management Tool"
+    link: "https://github.com/johndoe/project-management"
+    date: "2023"
+    hyperlink: false
+    show_link: true
+    description: "Built a full-stack project management application"
+    technologies: ["React", "Node.js", "MongoDB"]
+    highlights:
+      - "Implemented real-time updates using WebSocket"
+      - "Designed RESTful API architecture"
+
+skills:
+  - category: "Technical"
+    skills:
+      - "Python"
+      - "JavaScript"
+      - "React"
+      - "Node.js"
+      - "SQL"
+  - category: "Non-technical"
+    skills:
+      - "Project Management"
+      - "Team Leadership"
+      - "Problem Solving"
